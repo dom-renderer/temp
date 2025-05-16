@@ -1,0 +1,123 @@
+public function uploadAttachment(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'file' => 'required|file|max:102400',
+        'type' => 'required|in:video,image,document',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['error' => $validator->errors()], 422);
+    }
+
+    $myTempPath = "temp_uploads/" . md5(auth()->user()->id);
+    $file = $request->file('file');
+    $originalFilename = $file->getClientOriginalName();
+    $filename = time() . '_' . $originalFilename;
+    
+    // Handle chunked uploads
+    if ($request->has('dzchunkindex')) {
+        $result = $this->handleChunkedUpload($request, $myTempPath, $filename);
+        
+        // If not all chunks are received yet, return the chunk response
+        if (!is_string($result)) {
+            return $result;
+        }
+        
+        // Otherwise, $result contains the final file path
+        $path = $result;
+    } else {
+        // Handle regular uploads (non-chunked)
+        $path = $file->storeAs($myTempPath, $filename, 'public');
+        
+        // Compress videos
+        if ($request->type === 'video') {
+            $path = $this->compressVideo($path, $myTempPath, $filename);
+        }
+    }
+
+    return response()->json([
+        'success' => true,
+        'path' => $path,
+        'original_name' => $originalFilename
+    ]);
+}
+
+/**
+ * Handle chunked file uploads
+ */
+private function handleChunkedUpload($request, $myTempPath, $filename)
+{
+    $file = $request->file('file');
+    $uuid = $request->get('dzuuid');
+    $chunkIndex = $request->get('dzchunkindex');
+    $totalChunks = $request->get('dztotalchunkcount');
+    
+    // Create temporary folder for chunks
+    $tempFolder = storage_path("app/tmp/{$uuid}");
+    if (!is_dir($tempFolder)) {
+        mkdir($tempFolder, 0755, true);
+    }
+    
+    // Save this chunk
+    $file->move($tempFolder, $chunkIndex);
+    
+    // Check if all chunks have been uploaded
+    $uploadedChunks = count(scandir($tempFolder)) - 2; // Exclude . and ..
+    if ($uploadedChunks == $totalChunks) {
+        // Create directory if needed
+        $uploadDir = storage_path("app/public/{$myTempPath}");
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        
+        // Combine all chunks into one file
+        $finalPath = $uploadDir . '/' . $filename;
+        $output = fopen($finalPath, 'wb'); // Use binary mode
+        
+        for ($i = 0; $i < $totalChunks; $i++) {
+            $chunkPath = $tempFolder . '/' . $i;
+            $chunkContent = file_get_contents($chunkPath);
+            fwrite($output, $chunkContent);
+        }
+        fclose($output);
+        
+        // Clean up chunks
+        array_map('unlink', glob($tempFolder . '/*'));
+        rmdir($tempFolder);
+        
+        $path = "{$myTempPath}/{$filename}";
+        
+        // Compress if this is a video
+        if ($request->type === 'video') {
+            $path = $this->compressVideo($path, $myTempPath, $filename);
+        }
+        
+        return $path;
+    }
+    
+    // Not all chunks received yet
+    return response()->json(['chunkReceived' => $chunkIndex], 200);
+}
+
+/**
+ * Compress a video file
+ */
+private function compressVideo($path, $myTempPath, $filename)
+{
+    $compressedFilename = 'compressed_' . $filename;
+    $compressedPath = storage_path("app/public/{$myTempPath}/{$compressedFilename}");
+    
+    $inputPath = storage_path("app/public/{$path}");
+    $command = "ffmpeg -i \"{$inputPath}\" -c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k \"{$compressedPath}\"";
+    
+    $output = [];
+    $returnVar = 0;
+    exec($command, $output, $returnVar);
+    
+    if ($returnVar === 0 && file_exists($compressedPath)) {
+        return "{$myTempPath}/{$compressedFilename}";
+    }
+    
+    // Return original path if compression fails
+    return $path;
+}
