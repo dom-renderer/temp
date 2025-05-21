@@ -1,0 +1,2 @@
+StoreID,Maker,Checker,Start Date,Start Time,End Date,End Time,Hours Required,Grace Time,Allow Reschedule
+0000,0000_MAKER_EMPLOYEE,0000_CHECKER_EMPLOYEE,07-05-2025,12:30,09-05-2025,12:30,01:12,00:01,00:05,ONCE,0,No
