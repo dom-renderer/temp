@@ -1,0 +1,43 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Redirect root domain to public/
+    RewriteCond %{REQUEST_URI} ^/$
+    RewriteRule ^ /public/ [L,R=301]
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
+    RewriteRule ^(\.env|\.git|\.htaccess|\.htpasswd|composer\.(json|lock)|artisan|server\.php|config\..*|database\..*)$ - [F,L]
+    RewriteRule ^(.*/)?\.git/ - [F,L]
+
+    <Files .env>
+    Order allow,deny
+    Deny from all
+    ErrorDocument 404 /404.html
+    </Files>
+
+    # Protect the htaccess file
+    <Files .htaccess>
+    Order Allow,Deny
+    Deny from all
+    </Files>
+    
+
+
+</IfModule>

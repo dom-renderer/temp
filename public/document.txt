@@ -1,0 +1,45 @@
+DMS - App
+Application Overview & Users
+    • Primary objective defined as creating an application and admin panel for DMS to manage daily routine tasks assigned to technicians.
+    • User roles identified: Admin (full control), Engineers (senior staff who assign jobs), Technicians (receive job assignments), Customers (job owners) – clarifying that customers will not have app access, and Job Coordinator (manages job distribution).
+    • Subcontractors (plumbers, electricians) will not have app access - for DMS employees only.
+Current Job Management Workflow
+    • Job creation process: Jobs come in via phone calls or emails to coordinator/engineers.
+    • Job assignment depends on job complexity - coordinator assigns simple jobs, engineers handle complex ones requiring oversight.
+    • Daily prioritization: Previous day's incomplete jobs take priority, followed by emergency calls (hotels without water get immediate priority).
+️ Task Components & Features
+    • Job details include: Customer name, job title, short/long descriptions, and optional customer-provided photos/videos. I’ve filled out the below to give you an example.
+        ◦ Customer – Sandy Lane/ Joe Black
+        ◦ Contact Name:  Jill Smith
+        ◦ Contact number: 555 5555
+        ◦ Email: starrealty@gmail.com
+        ◦ Billing Name: c/o Star Real Estate
+        ◦ Location (for call out): No. 1 Cherry Hill, St. James
+        ◦ Date Open: July 10, 2025
+        ◦ Date Visited: July 11, 2025
+        ◦ Time on Site: 2hrs 40 min
+        ◦ Job No.: 5036
+        ◦ Job description (reason for call out) : Pump leaking
+        ◦ Job Summary (what was actually done): Replaced seals
+        ◦ Parts and Materials used & quantity: 4 seals and pipe tape
+        ◦ Signature for technician and customer/contact.
+    • Photo/video functionality: Both customer uploads (customer will send to DMS or technician directly and we will upload to the app) and technician field capture with in-app camera plus gallery upload options.
+    • Auto-assignment feature based on technician expertise and client familiarity, with availability checking.
+Field Work & Material Management
+    • On-site workflow: Technicians assess, repair if possible, document work summary and materials used.
+    • Material procurement: Two methods - Purchase orders for external purchases or requisitions for in-house stock.
+    • Approval processes: Office staff sign requisitions, engineers/coordinators approve purchase orders. (some office staff can also issue purchase orders).
+Job Status Management
+    • Rescheduling scenarios: When jobs cannot be completed due to external factors, technicians contact engineer/coordinator for rescheduling.
+    • Workshop transfers: Some items require removal to workshop for repair assessment.
+    • Escalation mechanism: Jobs not completed within three days should be automatically escalated.
+    • Cancellation policy: Only customers can cancel jobs, sometimes resulting in call-out fees.
+Billing & Invoice Process
+    • Invoice triggers: Jobs must be completed and customer-signed before billing begins.
+    • Deposit requirements: Large jobs require 60% deposits, configurable per job.
+    • Approval workflow: Billing coordinator compiles invoices, engineers review for accuracy, then sent to clients.
+    • Subcontractor billing: External contractor invoices included in final client billing.
+QuickBooks Integration Requirements
+    • Current system: Desktop QuickBooks Pro Plus (not Enterprise) with all modules except payroll.
+    • Dual file structure: Separate QuickBooks files for inventory management and accounting/invoicing.
+    • Integration needs: Auto-import/Manual import invoices and purchase orders from new app to QuickBooks using import/export functions.
