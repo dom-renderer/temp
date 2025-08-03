@@ -7,7 +7,7 @@
     ];
 
     $workManagementPermissions = [
-        'departments.index', 'expertises.index', 'jobs.index', 'requisitions.index'
+        'departments.index', 'expertises.index', 'jobs.index', 'requisitions.index', 'notification-templates.index'
     ];
 
     $inventoryManagementPermissions = [
@@ -21,7 +21,7 @@
     $segment = request()->segment(1);
 
     $userManagementSegments = ['users', 'roles', 'engineers', 'co-ordinators', 'technicians', 'customers'];
-    $workManagementSegments = ['departments', 'expertises', 'jobs', 'requisitions'];
+    $workManagementSegments = ['departments', 'expertises', 'jobs', 'requisitions', 'notification-templates'];
     $inventoryManagementSegments = ['categories', 'products'];
 
     $activeUserManagement = in_array($segment, $userManagementSegments);
@@ -100,6 +100,9 @@
                     @endcan
                     @can('requisitions.index')
                         <li class="sidebar-item"><a class='sidebar-link' href='{{ route('requisitions.index') }}'>Requisitions</a></li>
+                    @endcan
+                    @can('notification-templates.index')
+                        <li class="sidebar-item"><a class='sidebar-link' href='{{ route('notification-templates.index') }}'>Notification Templates</a></li>
                     @endcan
                 </ul>
             </li>

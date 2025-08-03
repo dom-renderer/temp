@@ -386,6 +386,32 @@ class Helper {
         ]);
     }
 
+    public function notificationTemplates(Request $request) {
+        $queryString = trim($request->searchQuery);
+        $page = $request->input('page', 1);
+        $limit = 10;
+
+        $query = \App\Models\NotificationTemplate::active();
+
+        if (!empty($queryString)) {
+            $query->where('code', 'LIKE', "%{$queryString}%");
+        }
+
+        $data = $query->paginate($limit, ['*'], 'page', $page);
+        $response = $data->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'text' => $item->title . ' - ' . str_replace(',', ' | ', ucwords($item->type_display))
+            ];
+        });
+        return response()->json([
+            'items' => $response->values(),
+            'pagination' => [
+                'more' => $data->hasMorePages()
+            ]
+        ]);
+    }
+
     public static function getIso2ByDialCode($dialCode = null) {
         if (empty(trim($dialCode))) {
             $dialCode = '91';

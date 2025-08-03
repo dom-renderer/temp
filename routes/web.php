@@ -19,6 +19,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('customers', \App\Http\Controllers\CustomerController::class);
     Route::resource('jobs', \App\Http\Controllers\JobController::class);
     Route::resource('requisitions', \App\Http\Controllers\RequisitionController::class);
+    Route::resource('notification-templates', \App\Http\Controllers\NotificationTemplateController::class);
+    Route::post('notification-templates/{notificationTemplate}/change-status', [\App\Http\Controllers\NotificationTemplateController::class, 'changeStatus'])->name('notification-templates.change-status');
     
     Route::post('category-list', [\App\Helpers\Helper::class, 'getCategories'])->name('category-list');
     Route::post('product-list', [\App\Helpers\Helper::class, 'getProducts'])->name('product-list');
@@ -30,6 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('department-list', [\App\Helpers\Helper::class, 'getDepartments'])->name('department-list');
     Route::post('expertise-list', [\App\Helpers\Helper::class, 'getExpertise'])->name('expertise-list');
     Route::post('job-list', [\App\Helpers\Helper::class, 'getJobs'])->name('job-list');
+    Route::post('notification-template-list', [\App\Helpers\Helper::class, 'notificationTemplates'])->name('notification-template-list');
 
     Route::post('products/{product}/images/upload', [\App\Http\Controllers\ProductImageController::class, 'upload'])->name('products.images.upload');
     Route::get('products/{product}/images', [\App\Http\Controllers\ProductImageController::class, 'list'])->name('products.images.list');

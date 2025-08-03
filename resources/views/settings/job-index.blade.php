@@ -182,10 +182,7 @@
                                         
                                             <div class="col-5">
                                                 <label class="form-label">Email Template</label>
-                                                <select class="form-select template-select">
-                                                    <option value="default">Default Template</option>
-                                                    <option value="urgent">Urgent Issue Template</option>
-                                                    <option value="custom">Custom Template</option>
+                                                <select class="template-select" id="template-0" required>
                                                 </select>
                                             </div>
                                         </div>
@@ -266,6 +263,50 @@
                 width: '100%',
                 ajax: {
                     url: "{{ route('department-list') }}",
+                    type: "POST",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            searchQuery: params.term,
+                            page: params.page || 1,  
+                            _token: "{{ csrf_token() }}"
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+
+                        return {
+                            results: $.map(data.items, function(item) {
+                                return {
+                                    id: item.id,
+                                    text: item.text
+                                };
+                            }),
+                            pagination: {
+                                more: data.pagination.more
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                templateResult: function(data) {
+                    if (data.loading) {
+                        return data.text;
+                    }
+
+                    var $result = $('<span></span>');
+                    $result.text(data.text);
+                    return $result;
+                }
+            });
+
+            $('#template-0').select2({
+                allowClear: true,
+                placeholder: 'Select template',
+                width: '100%',
+                ajax: {
+                    url: "{{ route('notification-template-list') }}",
                     type: "POST",
                     dataType: 'json',
                     delay: 250,
@@ -414,10 +455,7 @@
 
                         <div class="col-5">
                             <label class="form-label">Email Template</label>
-                            <select class="form-select template-select">
-                                <option value="default">Default Template</option>
-                                <option value="urgent" ${level > 1 ? 'selected' : ''}>Urgent Issue Template</option>
-                                <option value="custom">Custom Template</option>
+                            <select class="template-select" id="template-${level}" required>
                             </select>
                         </div>
                         
@@ -461,6 +499,50 @@
                 width: '100%',
                 ajax: {
                     url: "{{ route('department-list') }}",
+                    type: "POST",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            searchQuery: params.term,
+                            page: params.page || 1,  
+                            _token: "{{ csrf_token() }}"
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+
+                        return {
+                            results: $.map(data.items, function(item) {
+                                return {
+                                    id: item.id,
+                                    text: item.text
+                                };
+                            }),
+                            pagination: {
+                                more: data.pagination.more
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                templateResult: function(data) {
+                    if (data.loading) {
+                        return data.text;
+                    }
+
+                    var $result = $('<span></span>');
+                    $result.text(data.text);
+                    return $result;
+                }
+            });
+
+            $(`#template-${level}`).select2({
+                allowClear: true,
+                placeholder: 'Select template',
+                width: '100%',
+                ajax: {
+                    url: "{{ route('notification-template-list') }}",
                     type: "POST",
                     dataType: 'json',
                     delay: 250,

@@ -1142,7 +1142,6 @@ $(document).ready(function() {
         $('#customerMapModal').modal('hide');
     });
 
-    // Deposit functionality
     $('#requires_deposit').on('change', function() {
         if ($(this).val() == '1') {
             $('.deposit-fields').show();

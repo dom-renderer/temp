@@ -91,6 +91,10 @@ class PermissionSeeder extends Seeder
             [
                 'title' => 'Requisition',
                 'name' => 'requisitions'
+            ],
+            [
+                'title' => 'Notification Templates',
+                'name' => 'notification-templates'
             ]
         ];
 
@@ -122,6 +126,10 @@ class PermissionSeeder extends Seeder
             [
                 'title' => 'Job Settings Update',
                 'name' => 'job.settings-update'
+            ],
+            [
+                'title' => 'Notification Template Status Change',
+                'name' => 'notification-templates.change-status'
             ]
         ];
 

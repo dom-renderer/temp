@@ -165,7 +165,6 @@ $(document).ready(function() {
         }
     });
 
-    // Country, State, City dropdowns
     $('#country').select2({
         allowClear: true,
         placeholder: 'Select country',
@@ -270,7 +269,6 @@ $(document).ready(function() {
         }
     });
 
-    // Map functionality
     let map, marker, autocomplete;
 
     $('#mapButton').click(function() {

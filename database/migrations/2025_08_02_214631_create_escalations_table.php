@@ -18,7 +18,6 @@ return new class extends Migration
             $table->enum('priority', ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])->default('LOW');
             $table->unsignedBigInteger('template_id')->nullable();
             $table->json('recipients')->nullable();
-            $table->json('user_ids')->nullable();
             $table->json('departments')->nullable();
             $table->integer('level')->default(0);
             $table->softDeletes();
