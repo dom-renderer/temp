@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Escalation;
 use App\Models\Country;
 use App\Models\Setting;
+use App\Models\JobInspectionOrder;
+use App\Models\Department;
 
 class SettingController extends Controller
 {
@@ -77,8 +79,9 @@ class SettingController extends Controller
         $subTitle = 'Manage Job Settings';
         
         $escalations = Escalation::orderBy('level', 'asc')->get();
+        $jobInspectionOrders = JobInspectionOrder::getInspectionOrders();
 
-        return view($this->view . 'job-index', compact('title', 'subTitle', 'escalations'));
+        return view($this->view . 'job-index', compact('title', 'subTitle', 'escalations', 'jobInspectionOrders'));
     }
 
     public function jobUpdate(Request $request)
@@ -91,12 +94,15 @@ class SettingController extends Controller
             'escalations.*.template_id' => 'required|exists:notification_templates,id',
             'escalations.*.departments' => 'nullable|array',
             'escalations.*.departments.*' => 'exists:departments,id',
+            'job_inspection_orders' => 'nullable|array',
+            'job_inspection_orders.*.department_id' => 'required|exists:departments,id',
+            'job_inspection_orders.*.ordering' => 'required|integer|min:1',
         ]);
 
         DB::beginTransaction();
 
         try {
-
+            // Handle escalations
             $escToKeep = [];
 
             foreach ($request->escalations as $key => $escalationData) {
@@ -129,8 +135,38 @@ class SettingController extends Controller
                 Escalation::where('id', '>', 0)->delete();
             }
 
+            // Handle job inspection orders
+            if ($request->has('job_inspection_orders')) {
+                $inspectionToKeep = [];
+
+                foreach ($request->job_inspection_orders as $inspectionData) {
+                    if (isset($inspectionData['id']) && $inspectionData['id'] > 0) {
+                        JobInspectionOrder::where('id', $inspectionData['id'])->update([
+                            'department_id' => $inspectionData['department_id'],
+                            'ordering' => $inspectionData['ordering'],
+                        ]);
+
+                        $inspectionToKeep[] = $inspectionData['id'];
+                    } else {
+                        $inspectionToKeep[] = JobInspectionOrder::create([
+                            'department_id' => $inspectionData['department_id'],
+                            'ordering' => $inspectionData['ordering'],
+                        ])->id;
+                    }
+                }
+
+                if (!empty($inspectionToKeep)) {
+                    JobInspectionOrder::whereNotIn('id', $inspectionToKeep)->delete();
+                } else {
+                    JobInspectionOrder::where('id', '>', 0)->delete();
+                }
+            } else {
+                // If no inspection orders provided, delete all existing ones
+                JobInspectionOrder::where('id', '>', 0)->delete();
+            }
+
             DB::commit();
-            return redirect()->route('job.settings')->with('success', 'Job escalation settings updated successfully.');
+            return redirect()->route('job.settings')->with('success', 'Job settings updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('job.settings')->with('error', 'Something went wrong: ' . $e->getMessage());
