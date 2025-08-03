@@ -100,155 +100,189 @@
     <form method="POST" action="{{ route('job.settings-update') }}" enctype="multipart/form-data" id="escalationForm">
     @csrf
 
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
+            <div class="row">
                 @if ($errors->any())
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                @endif
-            </div>
-            <div class="card-body">
-                <div class="settings-section">
-                    <h4 class="section-title">
-                        <i class="fas fa-layer-group text-primary me-2"></i>
-                        Escalation Levels
-                    </h4>
-                    
-                    <div id="escalationLevels">
-                        @if($escalations->count() > 0)
-                            @foreach($escalations as $escalation)
-                                <input type="hidden" name="escalations[{{ $escalation->level }}][id]" value="{{ $escalation->id }}">
-                                <div class="escalation-level p-3" data-level="{{ $escalation->level }}">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h5 class="mb-0">
-                                            <span class="level-badge">Level {{ $escalation->level }}</span>
-                                            <span class="priority-indicator priority-{{ strtolower($escalation->priority) }}"></span>
-                                            Escalation Level {{ $escalation->level }}
-                                        </h5>
-                                        @if($loop->index > 0)
-                                            <button type="button" class="btn btn-sm btn-outline-danger remove-level">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        @endif
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <label class="form-label">Trigger After</label>
-                                            <div class="input-group">
-                                                <input type="number" class="form-control" name="escalations[{{ $escalation->level }}][time]" value="{{ $escalation->time }}" min="1">
-                                                <select class="form-select" name="escalations[{{ $escalation->level }}][time_type]">
-                                                    <option value="MINUTE" {{ $escalation->time_type === 'MINUTE' ? 'selected' : '' }}>Minutes</option>
-                                                    <option value="HOUR" {{ $escalation->time_type === 'HOUR' ? 'selected' : '' }}>Hours</option>
-                                                    <option value="DAY" {{ $escalation->time_type === 'DAY' ? 'selected' : '' }}>Days</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-4">
-                                            <label class="form-label">Priority Level</label>
-                                            <select class="form-select priority-select" name="escalations[{{ $escalation->level }}][priority]">
-                                                <option value="LOW" {{ $escalation->priority === 'LOW' ? 'selected' : '' }}>Low Priority</option>
-                                                <option value="MEDIUM" {{ $escalation->priority === 'MEDIUM' ? 'selected' : '' }}>Medium Priority</option>
-                                                <option value="HIGH" {{ $escalation->priority === 'HIGH' ? 'selected' : '' }}>High Priority</option>
-                                                <option value="CRITICAL" {{ $escalation->priority === 'CRITICAL' ? 'selected' : '' }}>Critical Priority</option>
-                                            </select>
-                                        </div>
-                                    
-                                        <div class="col-5">
-                                            <label class="form-label">Email Template</label>
-                                            <select class="template-select" name="escalations[{{ $escalation->level }}][template_id]" required>
-                                                <option value="{{ $escalation->template_id }}" selected>{{ $escalation->template->title ?? 'Select Template' }}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mt-4">
-                                        <div class="col-md-12">
-                                            <label class="form-label">Departments</label>
-                                            <div class="input-group">
-                                                <select name="escalations[{{ $escalation->level }}][departments][]" class="dept-s2" multiple>
-                                                    @foreach($escalation->departments as $deptId)
-                                                        <option value="{{ $deptId }}" selected>{{ \App\Models\Department::find($deptId)->name ?? '' }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
                             @endforeach
-                        @else
-                            <!-- Level 1 -->
-                            <div class="escalation-level p-3" data-level="1">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="mb-0">
-                                        <span class="level-badge">Level 1</span>
-                                        <span class="priority-indicator priority-low"></span>
-                                        Escalation Level 1
-                                    </h5>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <label class="form-label">Trigger After</label>
-                                        <div class="input-group">
-                                            <input type="number" class="form-control" name="escalations[1][time]" value="15" min="1">
-                                            <select class="form-select" name="escalations[1][time_type]">
-                                                <option value="MINUTE" selected>Minutes</option>
-                                                <option value="HOUR">Hours</option>
-                                                <option value="DAY">Days</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-4">
-                                        <label class="form-label">Priority Level</label>
-                                        <select class="form-select priority-select" name="escalations[1][priority]">
-                                            <option value="LOW" selected>Low Priority</option>
-                                            <option value="MEDIUM">Medium Priority</option>
-                                            <option value="HIGH">High Priority</option>
-                                            <option value="CRITICAL">Critical Priority</option>
-                                        </select>
-                                    </div>
-                                
-                                    <div class="col-5">
-                                        <label class="form-label">Email Template</label>
-                                        <select class="template-select" name="escalations[1][template_id]" required>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="row mt-4">
-                                    <div class="col-md-12">
-                                        <label class="form-label">Departments</label>
-                                        <div class="input-group">
-                                            <select name="escalations[1][departments][]" class="dept-s2" multiple></select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                            </div>
-                        @endif
-                    </div>
-                    
-                    <button type="button" class="btn btn-outline-primary" id="addLevel">
-                        <i class="fas fa-plus me-2"></i>Add Escalation Level
-                    </button>
-
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Save Escalation Settings
-                        </button>
+                        </ul>
                     </div>
                 </div>
+                @endif                
             </div>
-        </div>
-    </div>
+
+            <div class="row mt-2">
+                <div class="col-md-7">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="settings-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-layer-group text-primary me-2"></i>
+                                    Escalation Levels
+                                </h4>
+                                
+                                <div id="escalationLevels">
+                                    @if($escalations->count() > 0)
+                                        @foreach($escalations as $escalation)
+                                            <input type="hidden" name="escalations[{{ $escalation->level }}][id]" value="{{ $escalation->id }}">
+                                            <div class="escalation-level p-3" data-level="{{ $escalation->level }}">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h5 class="mb-0">
+                                                        <span class="level-badge">Level {{ $escalation->level }}</span>
+                                                        <span class="priority-indicator priority-{{ strtolower($escalation->priority) }}"></span>
+                                                        Escalation Level {{ $escalation->level }}
+                                                    </h5>
+                                                    @if($loop->index > 0)
+                                                        <button type="button" class="btn btn-sm btn-outline-danger remove-level">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Trigger After</label>
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control" name="escalations[{{ $escalation->level }}][time]" value="{{ $escalation->time }}" min="1">
+                                                            <select class="form-select" name="escalations[{{ $escalation->level }}][time_type]">
+                                                                <option value="MINUTE" {{ $escalation->time_type === 'MINUTE' ? 'selected' : '' }}>Minutes</option>
+                                                                <option value="HOUR" {{ $escalation->time_type === 'HOUR' ? 'selected' : '' }}>Hours</option>
+                                                                <option value="DAY" {{ $escalation->time_type === 'DAY' ? 'selected' : '' }}>Days</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">Priority Level</label>
+                                                        <select class="form-select priority-select" name="escalations[{{ $escalation->level }}][priority]">
+                                                            <option value="LOW" {{ $escalation->priority === 'LOW' ? 'selected' : '' }}>Low Priority</option>
+                                                            <option value="MEDIUM" {{ $escalation->priority === 'MEDIUM' ? 'selected' : '' }}>Medium Priority</option>
+                                                            <option value="HIGH" {{ $escalation->priority === 'HIGH' ? 'selected' : '' }}>High Priority</option>
+                                                            <option value="CRITICAL" {{ $escalation->priority === 'CRITICAL' ? 'selected' : '' }}>Critical Priority</option>
+                                                        </select>
+                                                    </div>
+                                                
+                                                    <div class="col-5">
+                                                        <label class="form-label">Email Template</label>
+                                                        <select class="template-select" name="escalations[{{ $escalation->level }}][template_id]" required>
+                                                            <option value="{{ $escalation->template_id }}" selected>{{ $escalation->template->title ?? 'Select Template' }}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mt-4">
+                                                    <div class="col-md-12">
+                                                        <label class="form-label">Departments</label>
+                                                        <div class="input-group">
+                                                            <select name="escalations[{{ $escalation->level }}][departments][]" class="dept-s2" multiple>
+                                                                @foreach($escalation->departments as $deptId)
+                                                                    <option value="{{ $deptId }}" selected>{{ \App\Models\Department::find($deptId)->name ?? '' }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <!-- Level 1 -->
+                                        <div class="escalation-level p-3" data-level="1">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 class="mb-0">
+                                                    <span class="level-badge">Level 1</span>
+                                                    <span class="priority-indicator priority-low"></span>
+                                                    Escalation Level 1
+                                                </h5>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Trigger After</label>
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control" name="escalations[1][time]" value="15" min="1">
+                                                        <select class="form-select" name="escalations[1][time_type]">
+                                                            <option value="MINUTE" selected>Minutes</option>
+                                                            <option value="HOUR">Hours</option>
+                                                            <option value="DAY">Days</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Priority Level</label>
+                                                    <select class="form-select priority-select" name="escalations[1][priority]">
+                                                        <option value="LOW" selected>Low Priority</option>
+                                                        <option value="MEDIUM">Medium Priority</option>
+                                                        <option value="HIGH">High Priority</option>
+                                                        <option value="CRITICAL">Critical Priority</option>
+                                                    </select>
+                                                </div>
+                                            
+                                                <div class="col-5">
+                                                    <label class="form-label">Email Template</label>
+                                                    <select class="template-select" name="escalations[1][template_id]" required>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-4">
+                                                <div class="col-md-12">
+                                                    <label class="form-label">Departments</label>
+                                                    <div class="input-group">
+                                                        <select name="escalations[1][departments][]" class="dept-s2" multiple></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                    @endif
+                                </div>
+                                
+                                <button type="button" class="btn btn-outline-primary" id="addLevel">
+                                    <i class="fas fa-plus me-2"></i>Add Escalation Level
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-body">
+
+                                <h4 class="section-title">
+                                    <i class="fas fa-layer-group text-primary me-2"></i>
+                                    Job Inspection Levels
+                                </h4>
+
+                                <div class="row">
+                                    <select id="all-departments">
+
+                                    </select>
+                                    <button type="button" class="btn btn-primary mt-2"> Add </button>
+                                </div>
+
+                                <div id="container-for-job-inspection">
+
+                                </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 mt-2">
+                    <div class="card">
+                        <div class="card-body">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Escalation Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>    
+
 
     </form>
 </div>
@@ -262,7 +296,7 @@
         $(document).ready(function() {
             let levelCounter = {{ $escalations->count() > 0 ? $escalations->max('level') : 1 }};
             
-            $('.dept-s2').select2({
+            $('.dept-s2, #all-departments').select2({
                 allowClear: true,
                 placeholder: 'Select departments',
                 width: '100%',
