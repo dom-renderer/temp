@@ -89,7 +89,6 @@ class SettingController extends Controller
             'escalations.*.time_type' => 'required|in:MINUTE,HOUR,DAY',
             'escalations.*.priority' => 'required|in:LOW,MEDIUM,HIGH,CRITICAL',
             'escalations.*.template_id' => 'required|exists:notification_templates,id',
-            'escalations.*.recipients' => 'nullable',
             'escalations.*.departments' => 'nullable|array',
             'escalations.*.departments.*' => 'exists:departments,id',
         ]);
@@ -101,22 +100,6 @@ class SettingController extends Controller
             $escToKeep = [];
 
             foreach ($request->escalations as $key => $escalationData) {
-                $recipients = [];
-                
-                if (isset($escalationData['recipients'])) {
-                    if (is_string($escalationData['recipients'])) {
-                        $recipients = json_decode($escalationData['recipients'], true) ?? [];
-                    } else {
-                        $recipients = $escalationData['recipients'] ?? [];
-                    }
-                }
-
-                foreach ($recipients as $recipient) {
-                    if (!filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
-                        throw new \Exception("Invalid email address: {$recipient}");
-                    }
-                }
-
                 if (isset($escalationData['id']) && $escalationData['id'] > 0) {
                     Escalation::where('id', $escalationData['id'])->update([
                         'level' => $escalationData['level'] ?? ($key + 1),
@@ -124,7 +107,6 @@ class SettingController extends Controller
                         'time_type' => $escalationData['time_type'],
                         'priority' => $escalationData['priority'],
                         'template_id' => $escalationData['template_id'],
-                        'recipients' => $recipients,
                         'departments' => $escalationData['departments'] ?? [],
                     ]);
 
@@ -136,7 +118,6 @@ class SettingController extends Controller
                         'time_type' => $escalationData['time_type'],
                         'priority' => $escalationData['priority'],
                         'template_id' => $escalationData['template_id'],
-                        'recipients' => $recipients,
                         'departments' => $escalationData['departments'] ?? [],
                     ])->id;
                 }

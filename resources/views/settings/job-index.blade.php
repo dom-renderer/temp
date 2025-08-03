@@ -52,22 +52,6 @@
         border-radius: 20px;
     }
     
-    .recipient-tag {
-        background: #e3f2fd;
-        color: #1976d2;
-        padding: 4px 8px;
-        border-radius: 15px;
-        font-size: 0.85rem;
-        margin: 2px;
-        display: inline-block;
-    }
-    
-    .recipient-tag .remove-tag {
-        margin-left: 5px;
-        cursor: pointer;
-        color: #f44336;
-    }
-    
     .priority-indicator {
         width: 12px;
         height: 12px;
@@ -184,28 +168,7 @@
                                     </div>
 
                                     <div class="row mt-4">
-                                        <div class="col-md-5">
-                                            <label class="form-label">Recipients</label>
-                                            <div class="input-group">
-                                                <input type="email" class="form-control recipient-input" placeholder="Enter email address">
-                                                <button type="button" class="btn btn-outline-primary add-recipient">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
-                                            </div>
-                                            <div class="recipients-list mt-2">
-                                                @foreach($escalation->recipients as $recipient)
-                                                    <span class="recipient-tag">{{ $recipient }}<span class="remove-tag" onclick="removeRecipient(this)">×</span></span>
-                                                @endforeach
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-2">
-                                            <p style="position: relative;top: 35px;left: 40px;">
-                                                OR
-                                            </p>
-                                        </div>
-
-                                        <div class="col-md-5">
+                                        <div class="col-md-12">
                                             <label class="form-label">Departments</label>
                                             <div class="input-group">
                                                 <select name="escalations[{{ $escalation->level }}][departments][]" class="dept-s2" multiple>
@@ -261,24 +224,7 @@
                                 </div>
 
                                 <div class="row mt-4">
-                                    <div class="col-md-5">
-                                        <label class="form-label">Recipients</label>
-                                        <div class="input-group">
-                                            <input type="email" class="form-control recipient-input" placeholder="Enter email address">
-                                            <button type="button" class="btn btn-outline-primary add-recipient">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                        </div>
-                                        <div class="recipients-list mt-2"></div>
-                                    </div>
-
-                                    <div class="col-md-2">
-                                        <p style="position: relative;top: 35px;left: 40px;">
-                                            OR
-                                        </p>
-                                    </div>
-
-                                    <div class="col-md-5">
+                                    <div class="col-md-12">
                                         <label class="form-label">Departments</label>
                                         <div class="input-group">
                                             <select name="escalations[1][departments][]" class="dept-s2" multiple></select>
@@ -404,31 +350,6 @@
                 }
             });
 
-            $(document).on('click', '.add-recipient', function() {
-                const input = $(this).siblings('.recipient-input');
-                const email = input.val().trim();
-                const recipientsList = $(this).closest('.col-md-5').find('.recipients-list');
-                let emailIsUniqe = true;
-                
-                if (email && validateEmail(email)) {
-
-                    $(this).parent().parent().find('.recipient-tag').each(function() {
-                        if ($(this).text().replace('×', '').trim().toLowerCase() == email.toLowerCase()) {
-                            emailIsUniqe = false;
-                            input.val('');
-                        }
-                    });
-
-                    if (emailIsUniqe) {
-                        const tag = `<span class="recipient-tag">${email}<span class="remove-tag" onclick="removeRecipient(this)">×</span></span>`;
-                        recipientsList.append(tag);
-                        input.val('');
-                    }
-                } else {
-                    alert('Please enter a valid email address');
-                }
-            });
-            
             $('#addLevel').click(function() {
                 levelCounter++;
                 createEscalationLevel(levelCounter);
@@ -472,21 +393,6 @@
                     return;
                 }
                 
-                $('.escalation-level').each(function() {
-                    const level = $(this).data('level');
-                    const recipients = [];
-                    
-                    $(this).find('.recipient-tag').each(function() {
-                        const email = $(this).text().replace('×', '').trim();
-                        recipients.push(email);
-                    });
-                    
-                    if (recipients.length > 0) {
-                        let safeJson = JSON.stringify(recipients).replace(/"/g, '&quot;');
-                        $(this).append(`<input type="hidden" name="escalations[${level}][recipients]" value="${safeJson}">`);
-                    }
-                });
-                
                 const submitBtn = $(this).find('button[type="submit"]');
                 const originalText = submitBtn.html();
                 submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...');
@@ -499,11 +405,7 @@
             const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return regex.test(email);
         }
-        
-        function removeRecipient(element) {
-            $(element).parent().remove();
-        }
-        
+               
         function createEscalationLevel(level) {
             const priorities = ['low', 'medium', 'high', 'critical'];
             const priorityNames = ['Low Priority', 'Medium Priority', 'High Priority', 'Critical Priority'];
@@ -555,25 +457,7 @@
                     </div>
                     
                     <div class="row mt-4">
-
-                        <div class="col-md-5">
-                            <label class="form-label">Recipients</label>
-                            <div class="input-group">
-                                <input type="email" class="form-control recipient-input" placeholder="Enter email address">
-                                <button type="button" class="btn btn-outline-primary add-recipient">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                            <div class="recipients-list mt-2"></div>
-                        </div>
-
-                        <div class="col-md-2">
-                            <p style="position: relative;top: 35px;left: 40px;">
-                                OR
-                            </p>
-                        </div>
-
-                        <div class="col-md-5">
+                        <div class="col-md-12">
                             <label class="form-label">Departments</label>
                             <div class="input-group">
                                 <select name="escalations[${level}][departments][]" class="dept-s2" multiple></select>

@@ -495,4 +495,7 @@ class Helper {
         return sprintf('%02dh %02dm %02ds', $hours, $minutes, $remainingSeconds);
     }
 
+    public static function sendPushNotification($tokens = [], $title = '', $body = '') {
+
+    }
 }

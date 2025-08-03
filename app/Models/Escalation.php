@@ -12,7 +12,6 @@ class Escalation extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'recipients' => 'array',
         'departments' => 'array',
     ];
 
