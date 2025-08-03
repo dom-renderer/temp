@@ -109,143 +109,202 @@
         @if(session('success'))
             <div class="p2 p-2 alert alert-success">{{ session('success') }}</div>
         @endif
+        @if(session('error'))
+            <div class="p2 p-2 alert alert-danger">{{ session('error') }}</div>
+        @endif
     </div>
-    <form method="POST" action="{{ route('job.settings-update') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('job.settings-update') }}" enctype="multipart/form-data" id="escalationForm">
     @csrf
 
     <div class="col-md-12">
         <div class="card">
+            <div class="card-header">
+                @if ($errors->any())
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
             <div class="card-body">
+                <div class="settings-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-layer-group text-primary me-2"></i>
+                        Escalation Levels
+                    </h4>
+                    
+                    <div id="escalationLevels">
+                        @if($escalations->count() > 0)
+                            @foreach($escalations as $escalation)
+                                <input type="hidden" name="escalations[{{ $escalation->level }}][id]" value="{{ $escalation->id }}">
+                                <div class="escalation-level p-3" data-level="{{ $escalation->level }}">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">
+                                            <span class="level-badge">Level {{ $escalation->level }}</span>
+                                            <span class="priority-indicator priority-{{ strtolower($escalation->priority) }}"></span>
+                                            Escalation Level {{ $escalation->level }}
+                                        </h5>
+                                        @if($loop->index > 0)
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-level">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endif
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Trigger After</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" name="escalations[{{ $escalation->level }}][time]" value="{{ $escalation->time }}" min="1">
+                                                <select class="form-select" name="escalations[{{ $escalation->level }}][time_type]">
+                                                    <option value="MINUTE" {{ $escalation->time_type === 'MINUTE' ? 'selected' : '' }}>Minutes</option>
+                                                    <option value="HOUR" {{ $escalation->time_type === 'HOUR' ? 'selected' : '' }}>Hours</option>
+                                                    <option value="DAY" {{ $escalation->time_type === 'DAY' ? 'selected' : '' }}>Days</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <label class="form-label">Priority Level</label>
+                                            <select class="form-select priority-select" name="escalations[{{ $escalation->level }}][priority]">
+                                                <option value="LOW" {{ $escalation->priority === 'LOW' ? 'selected' : '' }}>Low Priority</option>
+                                                <option value="MEDIUM" {{ $escalation->priority === 'MEDIUM' ? 'selected' : '' }}>Medium Priority</option>
+                                                <option value="HIGH" {{ $escalation->priority === 'HIGH' ? 'selected' : '' }}>High Priority</option>
+                                                <option value="CRITICAL" {{ $escalation->priority === 'CRITICAL' ? 'selected' : '' }}>Critical Priority</option>
+                                            </select>
+                                        </div>
+                                    
+                                        <div class="col-5">
+                                            <label class="form-label">Email Template</label>
+                                            <select class="template-select" name="escalations[{{ $escalation->level }}][template_id]" required>
+                                                <option value="{{ $escalation->template_id }}" selected>{{ $escalation->template->title ?? 'Select Template' }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
 
+                                    <div class="row mt-4">
+                                        <div class="col-md-5">
+                                            <label class="form-label">Recipients</label>
+                                            <div class="input-group">
+                                                <input type="email" class="form-control recipient-input" placeholder="Enter email address">
+                                                <button type="button" class="btn btn-outline-primary add-recipient">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                            <div class="recipients-list mt-2">
+                                                @foreach($escalation->recipients as $recipient)
+                                                    <span class="recipient-tag">{{ $recipient }}<span class="remove-tag" onclick="removeRecipient(this)">×</span></span>
+                                                @endforeach
+                                            </div>
+                                        </div>
 
+                                        <div class="col-md-2">
+                                            <p style="position: relative;top: 35px;left: 40px;">
+                                                OR
+                                            </p>
+                                        </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="settings-section">
-                                <h4 class="section-title">
-                                    <i class="fas fa-layer-group text-primary me-2"></i>
-                                    Escalation Levels
-                                </h4>
+                                        <div class="col-md-5">
+                                            <label class="form-label">Departments</label>
+                                            <div class="input-group">
+                                                <select name="escalations[{{ $escalation->level }}][departments][]" class="dept-s2" multiple>
+                                                    @foreach($escalation->departments as $deptId)
+                                                        <option value="{{ $deptId }}" selected>{{ \App\Models\Department::find($deptId)->name ?? '' }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            @endforeach
+                        @else
+                            <!-- Level 1 -->
+                            <div class="escalation-level p-3" data-level="1">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">
+                                        <span class="level-badge">Level 1</span>
+                                        <span class="priority-indicator priority-low"></span>
+                                        Escalation Level 1
+                                    </h5>
+                                </div>
                                 
-                                <div id="escalationLevels">
-                                    <!-- Level 1 -->
-                                    <div class="escalation-level p-3" data-level="1">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h5 class="mb-0">
-                                                <span class="level-badge">Level 1</span>
-                                                <span class="priority-indicator priority-low"></span>
-                                                Escalation Level 1
-                                            </h5>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Trigger After</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" name="escalations[1][time]" value="15" min="1">
+                                            <select class="form-select" name="escalations[1][time_type]">
+                                                <option value="MINUTE" selected>Minutes</option>
+                                                <option value="HOUR">Hours</option>
+                                                <option value="DAY">Days</option>
+                                            </select>
                                         </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <label class="form-label">Trigger After</label>
-                                                <div class="input-group">
-                                                    <input type="number" class="form-control" value="15" min="1">
-                                                    <select class="form-select">
-                                                        <option value="minutes">Minutes</option>
-                                                        <option value="hours">Hours</option>
-                                                        <option value="days">Days</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="col-md-4">
-                                                <label class="form-label">Priority Level</label>
-                                                <select class="form-select priority-select">
-                                                    <option value="low" selected>Low Priority</option>
-                                                    <option value="medium">Medium Priority</option>
-                                                    <option value="high">High Priority</option>
-                                                    <option value="critical">Critical Priority</option>
-                                                </select>
-                                            </div>
-                                        
-                                            <div class="col-5">
-                                                <label class="form-label">Email Template</label>
-                                                <select class="template-select" id="template-0" required>
-                                                </select>
-                                            </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label class="form-label">Priority Level</label>
+                                        <select class="form-select priority-select" name="escalations[1][priority]">
+                                            <option value="LOW" selected>Low Priority</option>
+                                            <option value="MEDIUM">Medium Priority</option>
+                                            <option value="HIGH">High Priority</option>
+                                            <option value="CRITICAL">Critical Priority</option>
+                                        </select>
+                                    </div>
+                                
+                                    <div class="col-5">
+                                        <label class="form-label">Email Template</label>
+                                        <select class="template-select" name="escalations[1][template_id]" required>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-4">
+                                    <div class="col-md-5">
+                                        <label class="form-label">Recipients</label>
+                                        <div class="input-group">
+                                            <input type="email" class="form-control recipient-input" placeholder="Enter email address">
+                                            <button type="button" class="btn btn-outline-primary add-recipient">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
                                         </div>
+                                        <div class="recipients-list mt-2"></div>
+                                    </div>
 
-                                        <div class="row mt-4">
-                                            <div class="col-md-5">
-                                                <label class="form-label">Recipients</label>
-                                                <div class="input-group">
-                                                    <input type="email" class="form-control recipient-input" placeholder="Enter email address">
-                                                    <button type="button" class="btn btn-outline-primary add-recipient">
-                                                        <i class="fas fa-plus"></i>
-                                                    </button>
-                                                </div>
-                                                <div class="recipients-list mt-2"></div>
-                                            </div>
+                                    <div class="col-md-2">
+                                        <p style="position: relative;top: 35px;left: 40px;">
+                                            OR
+                                        </p>
+                                    </div>
 
-                                            <div class="col-md-2">
-                                                <p style="position: relative;top: 35px;left: 40px;">
-                                                    OR
-                                                </p>
-                                            </div>
-
-                                            <div class="col-md-5">
-                                                <label class="form-label">Departments</label>
-                                                <div class="input-group">
-                                                    <select id="departments-0" class="dept-s2"></select>
-                                                </div>
-                                            </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label">Departments</label>
+                                        <div class="input-group">
+                                            <select name="escalations[1][departments][]" class="dept-s2" multiple></select>
                                         </div>
-                                        
                                     </div>
                                 </div>
                                 
-                                <button type="button" class="btn btn-outline-primary" id="addLevel">
-                                    <i class="fas fa-plus me-2"></i>Add Escalation Level
-                                </button>
                             </div>
+                        @endif
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline-primary" id="addLevel">
+                        <i class="fas fa-plus me-2"></i>Add Escalation Level
+                    </button>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Escalation Settings
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     </form>
-
 </div>
 @endsection
 
@@ -255,9 +314,9 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            let levelCounter = 1;
+            let levelCounter = {{ $escalations->count() > 0 ? $escalations->max('level') : 1 }};
             
-            $('#departments-0').select2({
+            $('.dept-s2').select2({
                 allowClear: true,
                 placeholder: 'Select departments',
                 width: '100%',
@@ -301,7 +360,7 @@
                 }
             });
 
-            $('#template-0').select2({
+            $('.template-select').select2({
                 allowClear: true,
                 placeholder: 'Select template',
                 width: '100%',
@@ -384,22 +443,56 @@
             });
             
             $(document).on('change', '.priority-select', function() {
-                const priority = $(this).val();
+                const priority = $(this).val().toLowerCase();
                 const indicator = $(this).closest('.escalation-level').find('.priority-indicator');
                 indicator.removeClass('priority-low priority-medium priority-high priority-critical');
                 indicator.addClass('priority-' + priority);
             });
             
-            $('#testEscalation').click(function() {
-                const btn = $(this);
-                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Testing...');
+            $('#escalationForm').on('submit', function(e) {
+                e.preventDefault();
                 
-                setTimeout(function() {
-                    btn.prop('disabled', false).html('<i class="fas fa-flask me-2"></i>Test Configuration');
-                    alert('Test email sent successfully! Check your inbox for the escalation notification.');
-                }, 2000);
+                let isValid = true;
+                let errorMessage = '';
+                
+                $('.template-select').each(function() {
+                    if (!$(this).val()) {
+                        isValid = false;
+                        errorMessage = 'Please select an email template for all escalation levels.';
+                        return false;
+                    }
+                });
+                
+                if (!isValid) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        text: errorMessage
+                    });
+                    return;
+                }
+                
+                $('.escalation-level').each(function() {
+                    const level = $(this).data('level');
+                    const recipients = [];
+                    
+                    $(this).find('.recipient-tag').each(function() {
+                        const email = $(this).text().replace('×', '').trim();
+                        recipients.push(email);
+                    });
+                    
+                    if (recipients.length > 0) {
+                        let safeJson = JSON.stringify(recipients).replace(/"/g, '&quot;');
+                        $(this).append(`<input type="hidden" name="escalations[${level}][recipients]" value="${safeJson}">`);
+                    }
+                });
+                
+                const submitBtn = $(this).find('button[type="submit"]');
+                const originalText = submitBtn.html();
+                submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...');
+                
+                this.submit();
             });
-            
         });
         
         function validateEmail(email) {
@@ -434,28 +527,28 @@
                         <div class="col-md-3">
                             <label class="form-label">Trigger After</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" value="${level * 30}" min="1">
-                                <select class="form-select">
-                                    <option value="minutes" ${level === 1 ? 'selected' : ''}>Minutes</option>
-                                    <option value="hours" ${level > 1 ? 'selected' : ''}>Hours</option>
-                                    <option value="days">Days</option>
+                                <input type="number" class="form-control" name="escalations[${level}][time]" value="${level * 30}" min="1">
+                                <select class="form-select" name="escalations[${level}][time_type]">
+                                    <option value="MINUTE" ${level === 1 ? 'selected' : ''}>Minutes</option>
+                                    <option value="HOUR" ${level > 1 ? 'selected' : ''}>Hours</option>
+                                    <option value="DAY">Days</option>
                                 </select>
                             </div>
                         </div>
                         
                         <div class="col-md-4">
                             <label class="form-label">Priority Level</label>
-                            <select class="form-select priority-select">
-                                <option value="low" ${priority === 'low' ? 'selected' : ''}>Low Priority</option>
-                                <option value="medium" ${priority === 'medium' ? 'selected' : ''}>Medium Priority</option>
-                                <option value="high" ${priority === 'high' ? 'selected' : ''}>High Priority</option>
-                                <option value="critical" ${priority === 'critical' ? 'selected' : ''}>Critical Priority</option>
+                            <select class="form-select priority-select" name="escalations[${level}][priority]">
+                                <option value="LOW" ${priority === 'low' ? 'selected' : ''}>Low Priority</option>
+                                <option value="MEDIUM" ${priority === 'medium' ? 'selected' : ''}>Medium Priority</option>
+                                <option value="HIGH" ${priority === 'high' ? 'selected' : ''}>High Priority</option>
+                                <option value="CRITICAL" ${priority === 'critical' ? 'selected' : ''}>Critical Priority</option>
                             </select>
                         </div>
 
                         <div class="col-5">
                             <label class="form-label">Email Template</label>
-                            <select class="template-select" id="template-${level}" required>
+                            <select class="template-select" name="escalations[${level}][template_id]" required>
                             </select>
                         </div>
                         
@@ -483,7 +576,7 @@
                         <div class="col-md-5">
                             <label class="form-label">Departments</label>
                             <div class="input-group">
-                                <select id="departments-${level}" class="dept-s2"></select>
+                                <select name="escalations[${level}][departments][]" class="dept-s2" multiple></select>
                             </div>
                         </div>
                         
@@ -493,7 +586,7 @@
 
             $('#escalationLevels').append(templateString);
 
-            $(`#departments-${level}`).select2({
+            $(`select[name="escalations[${level}][departments][]"]`).select2({
                 allowClear: true,
                 placeholder: 'Select departments',
                 width: '100%',
@@ -537,7 +630,7 @@
                 }
             });
 
-            $(`#template-${level}`).select2({
+            $(`select[name="escalations[${level}][template_id]"]`).select2({
                 allowClear: true,
                 placeholder: 'Select template',
                 width: '100%',
@@ -580,39 +673,6 @@
                     return $result;
                 }
             });
-        }
-                
-        function collectFormData() {
-            const formData = {
-                policyName: $('#policyName').val(),
-                status: $('#policyStatus').val(),
-                businessHours: $('#businessHours').val(),
-                timeZone: $('#timeZone').val(),
-                subjectTemplate: $('#subjectTemplate').val(),
-                bodyTemplate: $('#bodyTemplate').val(),
-                fromEmail: $('#fromEmail').val(),
-                levels: []
-            };
-            
-            $('.escalation-level').each(function() {
-                const level = {
-                    level: $(this).data('level'),
-                    triggerValue: $(this).find('input[type="number"]').val(),
-                    triggerUnit: $(this).find('.input-group select').val(),
-                    priority: $(this).find('.priority-select').val(),
-                    template: $(this).find('.template-select').val(),
-                    recipients: []
-                };
-                
-                $(this).find('.recipient-tag').each(function() {
-                    const email = $(this).text().replace('×', '').trim();
-                    level.recipients.push(email);
-                });
-                
-                formData.levels.push(level);
-            });
-            
-            return formData;
         }
     </script>
 @endpush

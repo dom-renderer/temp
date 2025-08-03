@@ -394,7 +394,7 @@ class Helper {
         $query = \App\Models\NotificationTemplate::active();
 
         if (!empty($queryString)) {
-            $query->where('code', 'LIKE', "%{$queryString}%");
+            $query->where('title', 'LIKE', "%{$queryString}%");
         }
 
         $data = $query->paginate($limit, ['*'], 'page', $page);
